@@ -1,0 +1,53 @@
+---
+name: Create Tags
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+
+  Tag:
+    name: Tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set tag ENV
+        run: |
+          echo "VERSION=v$(cat VERSION)" >> $GITHUB_ENV
+
+      - name: Create Tag
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ env.VERSION }}',
+              sha: context.sha
+            })
+
+  MajorTag:
+    name: Update Major Version
+    runs-on: ubuntu-latest
+    needs: [Tag]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set tag ENV
+        run: |
+          echo "VERSION=v$(cat VERSION)" >> $GITHUB_ENV
+          echo "MAJOR_VERSION=v$(cat VERSION | cut -d. -f1)" >> $GITHUB_ENV
+
+      - name: Update Major Version to ${{ github.ref_name }}
+        run: git tag -f ${{ env.MAJOR_VERSION }} ${{ env.VERSION }}
+
+      - name: Push Major Version Tag
+        run: git push origin ${{ env.MAJOR_VERSION }} --force

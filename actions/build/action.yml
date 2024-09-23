@@ -1,0 +1,53 @@
+name: Build
+inputs:
+  thread:
+    type: integer
+    description: Current thread
+    required: true
+    default: 3
+  parallelism:
+    type: integer
+    description: Number of builds to do in parallel
+    default: 3
+  promu_config:
+    type: string
+    description: Config file for promu
+    default: .promu.yml
+  promu_cgo_config:
+    type: string
+    description: Config file for promu-cgo
+    default: .promu-cgo.yml
+  promu_opts:
+    type: string
+    description: Options to pass to promu
+  promu_codesign_binary:
+    type: string
+    description: Binary file to codesign
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/promci/actions/setup_environment
+    - run: docker run --privileged linuxkit/binfmt:af88a591f9cc896a52ce596b9cf7ca26a061ef97
+      shell: bash
+    - run: |
+        if [[ -f ${{ inputs.promu_config }} ]]; then
+          ~/go/bin/promu --config ${{ inputs.promu_config }} crossbuild -v --parallelism ${{ inputs.parallelism }} --parallelism-thread ${{ inputs.thread }} ${{ inputs.promu_opts }}
+        fi
+      shell: bash
+    - run: |
+        if [[ -f ${{ inputs.promu_cgo_config }} ]]; then
+          ~/go/bin/promu --config ${{ inputs.promu_cgo_config }} crossbuild -v --parallelism ${{ inputs.parallelism }} --parallelism-thread ${{ inputs.thread }} ${{ inputs.promu_opts }}
+        fi
+      shell: bash
+    - run: |
+        if [[ -d ".build/darwin-arm64" ]]; then
+            ~/go/bin/promu codesign ".build/darwin-arm64/${{ inputs.promu_codesign_binary }}"
+        fi
+
+        if [[ -d ".build/darwin-amd64" ]]; then
+            ~/go/bin/promu codesign ".build/darwin-amd64/${{ inputs.promu_codesign_binary }}"
+        fi
+      shell: bash
+    - uses: ./.github/promci/actions/save_artifacts
+      with:
+        directory: .build

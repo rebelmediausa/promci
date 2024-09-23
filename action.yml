@@ -1,0 +1,14 @@
+name: 'Rebel Media PromCI'
+description: 'Build and Publish Prometheus exporters with GitHub Actions.'
+author: 'Rebel Media'
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: 'rebelmediausa/promci'
+        path: '.github/promci'
+        ref: v1.0.0
+branding:
+  icon: terminal
+  color: black
