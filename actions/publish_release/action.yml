@@ -1,9 +1,5 @@
 name: Publish image
 inputs:
-  image:
-    type: string
-    description: Custom container image.
-    default: cimg/go:1.19
   docker_hub_organization:
     type: string
     description: DockerHub organization
@@ -33,7 +29,6 @@ inputs:
     default: .promu.yml
 runs:
   using: composite
-  container: ${{ inputs.image }}
   steps:
     - uses: ./.github/promci/actions/setup_environment
       with:
