@@ -40,12 +40,12 @@ runs:
         fi
       shell: bash
     - run: |
-        if [[ -d ".build/darwin-arm64" ]]; then
-            ~/go/bin/promu codesign ".build/darwin-arm64/${{ inputs.promu_codesign_binary }}"
+        if [[ -d "$(pwd)/.build/darwin-arm64" ]]; then
+            ~/go/bin/promu codesign "$(pwd)/.build/darwin-arm64/${{ inputs.promu_codesign_binary }}"
         fi
 
-        if [[ -d ".build/darwin-amd64" ]]; then
-            ~/go/bin/promu codesign ".build/darwin-amd64/${{ inputs.promu_codesign_binary }}"
+        if [[ -d "$(pwd)/.build/darwin-amd64" ]]; then
+            ~/go/bin/promu codesign "$(pwd)/.build/darwin-amd64/${{ inputs.promu_codesign_binary }}"
         fi
       shell: bash
     - uses: ./.github/promci/actions/save_artifacts
