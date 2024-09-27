@@ -34,6 +34,7 @@ runs:
     - name: Build and Push ${{ github.ref_name }}
       uses: docker/build-push-action@v6
       with:
+        context: .
         platforms: ${{ inputs.container_image_arch }}
         push: true
         tags: ${{ inputs.registry }}/${{ inputs.organization }}/${{ inputs.container_image_name }}:${{ github.ref_name }}
