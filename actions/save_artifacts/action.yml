@@ -1,5 +1,4 @@
-# Tar is used because the default actions do not preserve directory structure
-# and file mode.
+---
 name: Save artifacts
 inputs:
   directory:

@@ -1,3 +1,4 @@
+---
 name: Publish image
 inputs:
   image_name:
@@ -45,7 +46,7 @@ runs:
         password: ${{ inputs.docker_hub_password }}
         container_image_name: ${{ inputs.image_name }}
         container_image_arch: ${{ inputs.image_arch }}
-        
+
     - uses: ./.github/promci/actions/publish_mian_images
       if: inputs.quay_io_organization != '' && inputs.quay_io_login != ''
       with:
