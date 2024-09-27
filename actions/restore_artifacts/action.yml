@@ -5,13 +5,16 @@ name: Restore artifacts
 runs:
   using: composite
   steps:
+
     - name: Download all workflow run artifacts
       uses: actions/download-artifact@v4
       with:
         pattern: artifact-*.tar
         merge-multiple: true
         path: .artifacts
-    - run: |
+
+    - name: Untar artifacts
+      run: |
         for tar in .artifacts/*.tar
         do
           tar xvf $tar

@@ -1,4 +1,4 @@
-name: Publish release image
+name: Publish image
 inputs:
   registry:
     type: string
@@ -29,13 +29,6 @@ runs:
         registry: ${{ inputs.registry }}
         username: ${{ inputs.login }}
         password: ${{ inputs.password }}
-
-    - name: Build and Push Latest
-      uses: docker/build-push-action@v6
-      with:
-        platforms: ${{ inputs.container_image_arch }}
-        push: true
-        tags: ${{ inputs.registry }}/${{ inputs.organization }}/${{ inputs.container_image_name }}:latest
 
     - name: Build and Push ${{ github.ref_name }}
       uses: docker/build-push-action@v6

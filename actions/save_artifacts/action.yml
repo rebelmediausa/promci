@@ -8,12 +8,16 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: |
+
+    - name: Tar artifacts
+      run: |
         tar cvf artifact-$(cat /proc/sys/kernel/random/uuid | sed 's/\-//g').tar ${{ inputs.directory }}
         echo NAME=$(echo artifact-*.tar) >> $GITHUB_OUTPUT
       shell: bash
       id: tar
-    - uses: actions/upload-artifact@v4
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.tar.outputs.NAME }}
         path: artifact-*.tar

@@ -1,5 +1,11 @@
 name: Publish image
 inputs:
+  image_name:
+    type: string
+    description: Name of the container image
+  image_arch:
+    type: string
+    description: Container image architecture
   docker_hub_organization:
     type: string
     description: DockerHub organization
@@ -30,18 +36,24 @@ inputs:
 runs:
   using: composite
   steps:
+
     - uses: ./.github/promci/actions/setup_environment
       with:
         enable_docker_multibuild: true
+
     - uses: ./.github/promci/actions/restore_artifacts
+
     - run: ~/go/bin/promu -c ${{ inputs.promu_config}} crossbuild tarballs
       shell: bash
+
     - run: ~/go/bin/promu -c ${{ inputs.promu_config}} checksum .tarballs
       shell: bash
+
     - run: ~/go/bin/promu -c ${{ inputs.promu_config}} release .tarballs
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
+        
     - uses: ./.github/promci/actions/publish_release_images
       if: inputs.docker_hub_organization != '' && inputs.docker_hub_login != ''
       with:
@@ -49,6 +61,9 @@ runs:
         organization: ${{ inputs.docker_hub_organization }}
         login: ${{ inputs.docker_hub_login }}
         password: ${{ inputs.docker_hub_password }}
+        container_image_name: ${{ inputs.image_name }}
+        container_image_arch: ${{ inputs.image_arch }}
+        
     - uses: ./.github/promci/actions/publish_release_images
       if: inputs.quay_io_organization != '' && inputs.quay_io_login != ''
       with:
@@ -56,3 +71,5 @@ runs:
         organization: ${{ inputs.quay_io_organization }}
         login: ${{ inputs.quay_io_login }}
         password: ${{ inputs.quay_io_password }}
+        container_image_name: ${{ inputs.image_name }}
+        container_image_arch: ${{ inputs.image_arch }}
