@@ -29,9 +29,8 @@ runs:
   steps:
 
     - uses: ./.github/promci/actions/setup_environment
-
-    - run: docker run --privileged linuxkit/binfmt:af88a591f9cc896a52ce596b9cf7ca26a061ef97
-      shell: bash
+      with:
+        enable_docker_multibuild: true
 
     - run: |
         if [[ -f ${{ inputs.promu_config }} ]]; then
