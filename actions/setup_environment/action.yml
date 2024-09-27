@@ -64,7 +64,7 @@ runs:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
       if: inputs.enable_docker_multibuild == 'true'
-      
+
     - name: Set up buildx
       uses: docker/setup-buildx-action@v3
       if: inputs.enable_docker_multibuild == 'true'
