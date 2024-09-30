@@ -16,6 +16,10 @@ inputs:
   container_image_name:
     description: Name of the container image
     type: string
+  container_image_tag:
+    description: Container image tag
+    type: string
+    default: ${{ github.ref_name }}
   container_image_arch:
     description: Container image architecture
     type: string
@@ -39,10 +43,10 @@ runs:
         push: true
         tags: ${{ inputs.registry }}/${{ inputs.organization }}/${{ inputs.container_image_name }}:latest
 
-    - name: Build and Push ${{ github.ref_name }}
+    - name: Build and Push ${{ inputs.container_image_tag}}
       uses: docker/build-push-action@v6
       with:
         context: .
         platforms: ${{ inputs.container_image_arch }}
         push: true
-        tags: ${{ inputs.registry }}/${{ inputs.organization }}/${{ inputs.container_image_name }}:${{ github.ref_name }}
+        tags: ${{ inputs.registry }}/${{ inputs.organization }}/${{ inputs.container_image_name }}:${{ inputs.container_image_tag }}

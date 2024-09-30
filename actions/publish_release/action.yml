@@ -4,6 +4,10 @@ inputs:
   image_name:
     type: string
     description: Name of the container image
+  image_tag:
+    description: Container image tag
+    type: string
+    default: ${{ github.ref_name }}
   image_arch:
     type: string
     description: Container image architecture
@@ -63,6 +67,7 @@ runs:
         login: ${{ inputs.docker_hub_login }}
         password: ${{ inputs.docker_hub_password }}
         container_image_name: ${{ inputs.image_name }}
+        container_image_tag: ${{ inputs.image_tag }}
         container_image_arch: ${{ inputs.image_arch }}
 
     - uses: ./.github/promci/actions/publish_release_images
@@ -73,4 +78,5 @@ runs:
         login: ${{ inputs.quay_io_login }}
         password: ${{ inputs.quay_io_password }}
         container_image_name: ${{ inputs.image_name }}
+        container_image_tag: ${{ inputs.image_tag }}
         container_image_arch: ${{ inputs.image_arch }}
