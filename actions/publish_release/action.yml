@@ -42,24 +42,30 @@ runs:
   using: composite
   steps:
 
-    - uses: ./.github/promci/actions/setup_environment
+    - name: Setup Environment
+      uses: ./.github/promci/actions/setup_environment
       with:
         enable_docker_multibuild: true
 
-    - uses: ./.github/promci/actions/restore_artifacts
+    - name: Restore Artifacts
+      uses: ./.github/promci/actions/restore_artifacts
 
-    - run: ~/go/bin/promu -c ${{ inputs.promu_config}} crossbuild tarballs
+    - name: Promu Crossbuild
+      run: ~/go/bin/promu -c ${{ inputs.promu_config}} crossbuild tarballs
       shell: bash
 
-    - run: ~/go/bin/promu -c ${{ inputs.promu_config}} checksum .tarballs
+    - name: Promu Checksum
+      run: ~/go/bin/promu -c ${{ inputs.promu_config}} checksum .tarballs
       shell: bash
 
-    - run: ~/go/bin/promu -c ${{ inputs.promu_config}} release .tarballs
+    - name: Promu Release
+      run: ~/go/bin/promu -c ${{ inputs.promu_config}} release .tarballs
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
 
-    - uses: ./.github/promci/actions/publish_release_images
+    - name: Run Publish Container to DockerHub
+      uses: ./.github/promci/actions/publish_release_images
       if: inputs.docker_hub_organization != '' && inputs.docker_hub_login != ''
       with:
         registry: docker.io
@@ -70,7 +76,8 @@ runs:
         container_image_tag: ${{ inputs.image_tag }}
         container_image_arch: ${{ inputs.image_arch }}
 
-    - uses: ./.github/promci/actions/publish_release_images
+    - name: Run Publish Container to Quay.io
+      uses: ./.github/promci/actions/publish_release_images
       if: inputs.quay_io_organization != '' && inputs.quay_io_login != ''
       with:
         registry: quay.io

@@ -9,7 +9,8 @@ runs:
   using: composite
   steps:
 
-    - run: |
+    - name: Setup Protocol Buffers
+      run: |
         env
         set -x
         curl -s -L https://github.com/protocolbuffers/protobuf/releases/download/v${{ inputs.version }}/protoc-${{ inputs.version }}-linux-x86_64.zip > /tmp/protoc.zip
@@ -19,5 +20,6 @@ runs:
         make proto
       shell: bash
 
-    - run: git diff --exit-code
+    - name: Git DIFF
+      run: git diff --exit-code
       shell: bash

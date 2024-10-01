@@ -28,7 +28,8 @@ runs:
   using: composite
   steps:
 
-    - uses: ./.github/promci/actions/setup_environment
+    - name: Setup Environment
+      uses: ./.github/promci/actions/setup_environment
       with:
         enable_docker_multibuild: true
 
@@ -54,6 +55,7 @@ runs:
         fi
       shell: bash
 
-    - uses: ./.github/promci/actions/save_artifacts
+    - name: Save Artifacts
+      uses: ./.github/promci/actions/save_artifacts
       with:
         directory: .build
