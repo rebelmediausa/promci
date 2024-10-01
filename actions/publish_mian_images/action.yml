@@ -39,5 +39,5 @@ runs:
         platforms: ${{ inputs.container_image_arch }}
         push: true
         sbom: true
-        tags: 
+        tags:
           - ${{ inputs.registry }}/${{ inputs.organization }}/${{ inputs.container_image_name }}:${{ github.ref_name }}
