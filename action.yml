@@ -8,7 +8,7 @@ runs:
       with:
         repository: 'rebelmediausa/promci'
         path: '.github/promci'
-        ref: v1.0.3
+        ref: v1.0.4
 branding:
   icon: terminal
   color: black
