@@ -43,6 +43,6 @@ runs:
         platforms: ${{ inputs.container_image_arch }}
         push: true
         sbom: true
-        tags:
-          - ${{ inputs.registry }}/${{ inputs.organization }}/${{ inputs.container_image_name }}:latest
-          - ${{ inputs.registry }}/${{ inputs.organization }}/${{ inputs.container_image_name }}:${{ inputs.container_image_tag }}
+        tags: |
+          ${{ inputs.registry }}/${{ inputs.organization }}/${{ inputs.container_image_name }}:latest
+          ${{ inputs.registry }}/${{ inputs.organization }}/${{ inputs.container_image_name }}:${{ inputs.container_image_tag }}
