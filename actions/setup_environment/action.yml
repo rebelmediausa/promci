@@ -114,11 +114,4 @@ runs:
           echo "BRANCH=$BRANCH"
           echo "TAGS=$TAGS"
         } >> "$GITHUB_ENV"
-
-    - name: Show ENVs
-      shell: bash
-      run: |
-        echo "VERSION=$VERSION"
-        echo "REVISION=$REVISION"
-        echo "BRANCH=$BRANCH"
-        echo "TAGS=$TAGS"
+        echo "$VERSION" > VERSION
