@@ -51,18 +51,38 @@ runs:
       uses: ./.github/promci/actions/restore_artifacts
 
     - name: Promu Crossbuild
-      run: ~/go/bin/promu -c ${{ inputs.promu_config}} crossbuild tarballs
       shell: bash
+      run: |
+        echo "${{ env.VERSION }}" > VERSION
+        ~/go/bin/promu -c ${{ inputs.promu_config}} crossbuild tarballs
+      env:
+        VERSION: ${{ env.VERSION }}
+        REVISION: ${{ env.REVISION }}
+        BRANCH: ${{ env.BRANCH }}
+        TAGS: ${{ env.TAGS }}
 
     - name: Promu Checksum
-      run: ~/go/bin/promu -c ${{ inputs.promu_config}} checksum .tarballs
       shell: bash
+      run: |
+        echo "${{ env.VERSION }}" > VERSION
+        ~/go/bin/promu -c ${{ inputs.promu_config}} checksum .tarballs
+      env:
+        VERSION: ${{ env.VERSION }}
+        REVISION: ${{ env.REVISION }}
+        BRANCH: ${{ env.BRANCH }}
+        TAGS: ${{ env.TAGS }}
 
     - name: Promu Release
-      run: ~/go/bin/promu -c ${{ inputs.promu_config}} release .tarballs
       shell: bash
+      run: |
+        echo "${{ env.VERSION }}" > VERSION
+        ~/go/bin/promu -c ${{ inputs.promu_config}} release .tarballs
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
+        VERSION: ${{ env.VERSION }}
+        REVISION: ${{ env.REVISION }}
+        BRANCH: ${{ env.BRANCH }}
+        TAGS: ${{ env.TAGS }}
 
     - name: Run Publish Container to DockerHub
       uses: ./.github/promci/actions/publish_release_images
