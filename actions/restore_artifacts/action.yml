@@ -13,9 +13,15 @@ runs:
 
     - name: Untar artifacts
       run: |
-        for tar in .artifacts/*.tar
-        do
-          tar xvf $tar
+        set -euo pipefail
+        shopt -s nullglob
+        tars=(.artifacts/*.tar)
+        if (( ${#tars[@]} == 0 )); then
+          echo "No artifacts found in .artifacts/"
+          exit 0
+        fi
+        for tar_file in "${tars[@]}"; do
+          tar xvf "$tar_file"
         done
-        rm -v .artifacts/*.tar
+        rm -v -- "${tars[@]}"
       shell: bash

@@ -35,6 +35,26 @@ runs:
         username: ${{ inputs.login }}
         password: ${{ inputs.password }}
 
+    - name: Compute image tags
+      id: image_tags
+      shell: bash
+      run: |
+        set -euo pipefail
+        image="${{ inputs.registry }}/${{ inputs.organization }}/${{ inputs.container_image_name }}"
+        tag="${{ inputs.container_image_tag }}"
+
+        tags=("${image}:${tag}")
+        case "${tag}" in
+          *-alpha*|*-beta*|*-rc*) ;;
+          *) tags+=("${image}:latest") ;;
+        esac
+
+        {
+          echo "tags<<EOF"
+          printf '%s\n' "${tags[@]}"
+          echo "EOF"
+        } >> "$GITHUB_OUTPUT"
+
     - name: Build and Push
       uses: docker/build-push-action@v6
       with:
@@ -43,6 +63,4 @@ runs:
         platforms: ${{ inputs.container_image_arch }}
         push: true
         sbom: true
-        tags: |
-          ${{ inputs.registry }}/${{ inputs.organization }}/${{ inputs.container_image_name }}:latest
-          ${{ inputs.registry }}/${{ inputs.organization }}/${{ inputs.container_image_name }}:${{ inputs.container_image_tag }}
+        tags: ${{ steps.image_tags.outputs.tags }}

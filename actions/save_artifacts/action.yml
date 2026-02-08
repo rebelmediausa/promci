@@ -10,8 +10,11 @@ runs:
 
     - name: Tar artifacts
       run: |
-        tar cvf artifact-$(cat /proc/sys/kernel/random/uuid | sed 's/\-//g').tar ${{ inputs.directory }}
-        echo NAME=$(echo artifact-*.tar) >> $GITHUB_OUTPUT
+        set -euo pipefail
+        uuid="$(cat /proc/sys/kernel/random/uuid | tr -d '-')"
+        tar_name="artifact-${uuid}.tar"
+        tar cvf "$tar_name" "${{ inputs.directory }}"
+        echo "NAME=$tar_name" >> "$GITHUB_OUTPUT"
       shell: bash
       id: tar
 

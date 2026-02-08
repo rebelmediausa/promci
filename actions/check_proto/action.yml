@@ -11,10 +11,9 @@ runs:
 
     - name: Setup Protocol Buffers
       run: |
-        env
-        set -x
-        curl -s -L https://github.com/protocolbuffers/protobuf/releases/download/v${{ inputs.version }}/protoc-${{ inputs.version }}-linux-x86_64.zip > /tmp/protoc.zip
-        unzip -d /tmp /tmp/protoc.zip
+        set -euo pipefail
+        curl -fsSL https://github.com/protocolbuffers/protobuf/releases/download/v${{ inputs.version }}/protoc-${{ inputs.version }}-linux-x86_64.zip -o /tmp/protoc.zip
+        unzip -q -o -d /tmp /tmp/protoc.zip
         chmod +x /tmp/bin/protoc
         export PATH=/tmp/bin:$PATH
         make proto
