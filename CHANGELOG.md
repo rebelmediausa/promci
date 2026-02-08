@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.6
+
+- Allow for beta alpha and rc builds
+- Code cleanup
+
 ## 1.0.5
 
 - Add env to build
