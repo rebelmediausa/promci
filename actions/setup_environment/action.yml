@@ -101,7 +101,19 @@ runs:
     - name: Prepare build metadata
       shell: bash
       run: |
-        echo "VERSION=$(cat VERSION)" >> $GITHUB_ENV
-        echo "REVISION=$(git rev-parse HEAD)" >> $GITHUB_ENV
-        echo "BRANCH=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
-        echo "TAGS=$(git tag --points-at HEAD | paste -sd ',' -)" >> $GITHUB_ENV
+        set -euo pipefail
+        TAG="${GITHUB_REF_NAME}"
+        VERSION="${TAG#v}"
+        COMMIT="$(git rev-parse "${TAG}^{commit}")"
+        git fetch --prune --tags origin '+refs/heads/*:refs/remotes/origin/*'
+        BRANCH="$(git for-each-ref --contains "$COMMIT" --format='%(refname:short)' refs/remotes/origin/ \
+          | grep -v '->' \
+          | sed 's#^origin/##' \
+          | head -n1)"
+        TAGS="$(git tag --points-at "$COMMIT" | paste -sd ',' -)"
+        {
+          echo "VERSION=$VERSION"
+          echo "REVISION=$COMMIT"
+          echo "BRANCH=$BRANCH"
+          echo "TAGS=$TAGS"
+        } >> "$GITHUB_ENV"
