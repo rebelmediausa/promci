@@ -45,7 +45,7 @@ runs:
 
         tags=("${image}:${tag}")
         case "${tag}" in
-          *-alpha*|*-beta*|*-rc*) ;;
+          *-*) ;;
           *) tags+=("${image}:latest") ;;
         esac
 
