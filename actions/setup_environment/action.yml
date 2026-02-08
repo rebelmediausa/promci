@@ -99,6 +99,7 @@ runs:
       if: inputs.enable_docker_multibuild == 'true'
 
     - name: Prepare build metadata
+      shell: bash
       run: |
         echo "VERSION=$(cat VERSION)" >> $GITHUB_ENV
         echo "REVISION=$(git rev-parse HEAD)" >> $GITHUB_ENV
