@@ -53,36 +53,33 @@ runs:
     - name: Promu Crossbuild
       shell: bash
       run: |
-        echo "${{ env.VERSION }}" > VERSION
         ~/go/bin/promu -c ${{ inputs.promu_config}} crossbuild tarballs
       env:
-        VERSION: ${{ env.VERSION }}
-        REVISION: ${{ env.REVISION }}
-        BRANCH: ${{ env.BRANCH }}
-        TAGS: ${{ env.TAGS }}
+        Version: ${{ env.VERSION }}
+        Revision: ${{ env.REVISION }}
+        Branch: ${{ env.BRANCH }}
+        Tags: ${{ env.TAGS }}
 
     - name: Promu Checksum
       shell: bash
       run: |
-        echo "${{ env.VERSION }}" > VERSION
         ~/go/bin/promu -c ${{ inputs.promu_config}} checksum .tarballs
       env:
-        VERSION: ${{ env.VERSION }}
-        REVISION: ${{ env.REVISION }}
-        BRANCH: ${{ env.BRANCH }}
-        TAGS: ${{ env.TAGS }}
+        Version: ${{ env.VERSION }}
+        Revision: ${{ env.REVISION }}
+        Branch: ${{ env.BRANCH }}
+        Tags: ${{ env.TAGS }}
 
     - name: Promu Release
       shell: bash
       run: |
-        echo "${{ env.VERSION }}" > VERSION
         ~/go/bin/promu -c ${{ inputs.promu_config}} release .tarballs
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
-        VERSION: ${{ env.VERSION }}
-        REVISION: ${{ env.REVISION }}
-        BRANCH: ${{ env.BRANCH }}
-        TAGS: ${{ env.TAGS }}
+        Version: ${{ env.VERSION }}
+        Revision: ${{ env.REVISION }}
+        Branch: ${{ env.BRANCH }}
+        Tags: ${{ env.TAGS }}
 
     - name: Run Publish Container to DockerHub
       uses: ./.github/promci/actions/publish_release_images

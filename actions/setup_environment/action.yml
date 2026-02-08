@@ -114,3 +114,4 @@ runs:
           echo "BRANCH=$BRANCH"
           echo "TAGS=$TAGS"
         } >> "$GITHUB_ENV"
+        echo "$VERSION" > VERSION

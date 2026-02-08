@@ -36,29 +36,27 @@ runs:
     - name: Promu Build
       shell: bash
       run: |
-        echo "${{ env.VERSION }}" > VERSION
         if [[ -f ${{ inputs.promu_config }} ]]; then
           ~/go/bin/promu --config ${{ inputs.promu_config }} crossbuild -v --parallelism ${{ inputs.parallelism }} --parallelism-thread ${{ inputs.thread }} ${{ inputs.promu_opts }}
         fi
       env:
-        VERSION: ${{ env.VERSION }}
-        REVISION: ${{ env.REVISION }}
-        BRANCH: ${{ env.BRANCH }}
-        TAGS: ${{ env.TAGS }}
+        Version: ${{ env.VERSION }}
+        Revision: ${{ env.REVISION }}
+        Branch: ${{ env.BRANCH }}
+        Tags: ${{ env.TAGS }}
 
 
     - name: Promu cgo Build
       shell: bash
       run: |
-        echo "${{ env.VERSION }}" > VERSION
         if [[ -f ${{ inputs.promu_cgo_config }} ]]; then
           ~/go/bin/promu --config ${{ inputs.promu_cgo_config }} crossbuild -v --parallelism ${{ inputs.parallelism }} --parallelism-thread ${{ inputs.thread }} ${{ inputs.promu_opts }}
         fi
       env:
-        VERSION: ${{ env.VERSION }}
-        REVISION: ${{ env.REVISION }}
-        BRANCH: ${{ env.BRANCH }}
-        TAGS: ${{ env.TAGS }}
+        Version: ${{ env.VERSION }}
+        Revision: ${{ env.REVISION }}
+        Branch: ${{ env.BRANCH }}
+        Tags: ${{ env.TAGS }}
 
     - name: Codesign
       shell: bash
