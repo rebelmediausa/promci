@@ -103,8 +103,14 @@ runs:
       run: |
         set -euo pipefail
         TAG="${GITHUB_REF_NAME}"
-        VERSION="${TAG#v}"
-        COMMIT="$(git rev-parse "${TAG}^{commit}")"
+
+        if COMMIT="$(git rev-parse "${TAG}^{commit}" 2>/dev/null)"; then
+          VERSION="${TAG#v}"
+        else
+          COMMIT="$(git rev-parse HEAD)"
+          VERSION="$(cat VERSION 2>/dev/null || echo 0.0.0)-dev"
+        fi
+
         git fetch --prune --tags origin '+refs/heads/*:refs/remotes/origin/*'
         BRANCH="$(git branch -r --contains "$COMMIT" --format='%(refname:short)' | grep -v -- '^origin/HEAD' | sed 's#^origin/##' | head -n1)"
         TAGS="$(git tag --points-at "$COMMIT" | paste -sd ',' -)"
