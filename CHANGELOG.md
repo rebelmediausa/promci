@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.0
+
+- fix univerasl building and testing
+
 ## 1.0.6
 
 - Allow for beta alpha and rc builds
