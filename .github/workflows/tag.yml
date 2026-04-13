@@ -21,7 +21,7 @@ jobs:
           echo "VERSION=v$(cat VERSION)" >> $GITHUB_ENV
 
       - name: Create Tag
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             github.rest.git.createRef({
