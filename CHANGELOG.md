@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.3.1
+
+- Security: every input reaches the shell through a quoted environment variable
+  instead of being interpolated into the script (`build`, `check_proto`,
+  `publish_release`, `publish_release_images`, `save_artifacts`,
+  `setup_environment`). `promu_opts` is split on whitespace into separate
+  arguments and never evaluated.
+- Releases now also publish a GitHub release with the CHANGELOG notes.
+- Repository: gitflow (develop is the default branch), rulesets, CodeQL,
+  Scorecard, dependency review, and a Lint check that rejects unpinned actions
+  and interpolated inputs.
+
 ## 1.3.0
 
 - Update the actions promci runs to their current majors: checkout v7.0.1,

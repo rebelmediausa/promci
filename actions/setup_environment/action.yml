@@ -44,9 +44,11 @@ runs:
 
     - name: Set GOMEMLIMIT
       shell: bash
+      env:
+        MEMLIMIT_RATIO: ${{ inputs.memlimit_ratio }}
       run: |
         set -euo pipefail
-        ratio="${{ inputs.memlimit_ratio }}"
+        ratio="$MEMLIMIT_RATIO"
         cgroup_path="$(
           awk -F: '
             $2 == "" { print $3; exit }                           # cgroup v2

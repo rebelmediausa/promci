@@ -1,2 +1,11 @@
+# Editors and OS.
 .idea/
+.vscode/
 .DS_Store
+
+# Local AI-assistant and tool configuration. .mcp.json routinely carries API
+# tokens; settings.local.json is per-machine. Neither is ever committed.
+.mcp.json
+.claude/settings.local.json
+
+.env
