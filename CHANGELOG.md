@@ -2,6 +2,12 @@
 
 ## 1.3.1
 
+- Fix: `setup_environment` used the branch name as the version on a branch
+  run (`workflow_dispatch` on a branch), and rewrote `VERSION` with it. The ref
+  name is now used only when the run was started by a tag, and `VERSION` is
+  rewritten only when the version differs.
+- Fix: the build step no longer fails when the commit is on no branch, as a
+  pull request's merge commit is.
 - Security: every input reaches the shell through a quoted environment variable
   instead of being interpolated into the script (`build`, `check_proto`,
   `publish_release`, `publish_release_images`, `save_artifacts`,
