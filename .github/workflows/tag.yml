@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      created: ${{ steps.check.outputs.created }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -20,7 +22,21 @@ jobs:
         run: |
           echo "VERSION=v$(cat VERSION)" >> "$GITHUB_ENV"
 
+      # A merge that does not bump VERSION (a Dependabot update, a README fix)
+      # is not a release. Skipping here, rather than letting createRef fail on
+      # the existing tag, keeps master green and leaves the major tag alone.
+      - name: Check whether the tag already exists
+        id: check
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/${VERSION}" >/dev/null; then
+            echo "created=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::${VERSION} already exists; nothing to release. Bump VERSION to release."
+          else
+            echo "created=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Create Tag
+        if: steps.check.outputs.created == 'true'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
@@ -35,6 +51,9 @@ jobs:
     name: Update Major Version
     runs-on: ubuntu-latest
     needs: [Tag]
+    if: needs.Tag.outputs.created == 'true'
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -47,7 +66,7 @@ jobs:
           echo "MAJOR_VERSION=v$(cut -d. -f1 VERSION)" >> "$GITHUB_ENV"
 
       - name: Update Major Version to ${{ github.ref_name }}
-        run: git tag -f ${{ env.MAJOR_VERSION }} ${{ env.VERSION }}
+        run: git tag -f "$MAJOR_VERSION" "$VERSION"
 
       - name: Push Major Version Tag
-        run: git push origin ${{ env.MAJOR_VERSION }} --force
+        run: git push origin "$MAJOR_VERSION" --force

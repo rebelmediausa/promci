@@ -1,13 +1,30 @@
 version: 2
 
 updates:
-  # Every composite action lives in its own directory, and Dependabot only
-  # reads the directories it is told about. Listing them all keeps every
-  # nested pin current, not just the repository's own workflows.
+  # GitHub Actions: minor/patch bumps are batched into one weekly PR; major
+  # bumps still get their own PR so they can be reviewed individually.
+  #
+  # Every composite action lives in its own directory, and Dependabot only reads
+  # the directories it is told about. Listing them all keeps every nested pin
+  # current, not just the repository's own workflows.
   - package-ecosystem: "github-actions"
     directories:
       - "/"
       - "/actions/*"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/New_York"
     open-pull-requests-limit: 10
+    groups:
+      actions-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    # Supply-chain buffer: don't adopt a release in its first week so yanked or
+    # compromised releases have time to surface. Security updates are exempt.
+    cooldown:
+      default-days: 7
