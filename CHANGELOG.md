@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.0
+
+- Update the actions promci runs to their current majors: checkout v7.0.1,
+  cache v6.1.0, upload-artifact v7.0.1, download-artifact v8.0.1,
+  github-script v9.0.0, docker/login-action v4.6.0,
+  docker/build-push-action v7.4.0, docker/setup-buildx-action v4.4.1
+- Dependabot: one grouped weekly PR for minor and patch updates (Monday 06:00
+  America/New_York), majors individually, and a 7-day cooldown on new releases
+- Tagging skips a merge that does not change VERSION instead of failing
+
 ## 1.2.0
 
 - Pin every nested action to a full commit SHA (same major versions as before)
