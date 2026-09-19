@@ -4,11 +4,20 @@ author: 'Rebel Media'
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v4
-      with:
-        repository: 'rebelmediausa/promci'
-        path: '.github/promci'
-        ref: v1.1.0
+    # The runner has already downloaded this action at exactly the ref the
+    # caller pinned (a tag or, preferably, a commit SHA). Copying that copy into
+    # the workspace, instead of checking out a second one at a hard-coded tag,
+    # means the nested actions a workflow then runs are the same commit it
+    # pinned — so pinning promci by SHA really pins everything it runs.
+    - name: Copy the PromCI actions into the workspace
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+      run: |
+        set -euo pipefail
+        rm -rf .github/promci
+        mkdir -p .github/promci
+        cp -R "${ACTION_PATH}/." .github/promci/
 branding:
   icon: terminal
   color: black
