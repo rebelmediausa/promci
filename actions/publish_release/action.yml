@@ -53,8 +53,10 @@ runs:
     - name: Promu Crossbuild
       shell: bash
       run: |
-        ~/go/bin/promu -c ${{ inputs.promu_config}} crossbuild tarballs
+        set -euo pipefail
+        ~/go/bin/promu -c "$PROMU_CONFIG" crossbuild tarballs
       env:
+        PROMU_CONFIG: ${{ inputs.promu_config }}
         Version: ${{ env.VERSION }}
         Revision: ${{ env.REVISION }}
         Branch: ${{ env.BRANCH }}
@@ -63,8 +65,10 @@ runs:
     - name: Promu Checksum
       shell: bash
       run: |
-        ~/go/bin/promu -c ${{ inputs.promu_config}} checksum .tarballs
+        set -euo pipefail
+        ~/go/bin/promu -c "$PROMU_CONFIG" checksum .tarballs
       env:
+        PROMU_CONFIG: ${{ inputs.promu_config }}
         Version: ${{ env.VERSION }}
         Revision: ${{ env.REVISION }}
         Branch: ${{ env.BRANCH }}
@@ -73,8 +77,10 @@ runs:
     - name: Promu Release
       shell: bash
       run: |
-        ~/go/bin/promu -c ${{ inputs.promu_config}} release .tarballs
+        set -euo pipefail
+        ~/go/bin/promu -c "$PROMU_CONFIG" release .tarballs
       env:
+        PROMU_CONFIG: ${{ inputs.promu_config }}
         GITHUB_TOKEN: ${{ inputs.github_token }}
         Version: ${{ env.VERSION }}
         Revision: ${{ env.REVISION }}

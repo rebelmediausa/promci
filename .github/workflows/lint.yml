@@ -1,0 +1,99 @@
+---
+# Lint and Changelog are required checks in the develop and master rulesets.
+name: Lint
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop, master]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The image carries shellcheck, so every run: block is checked too.
+      - name: actionlint
+        run: |
+          docker run --rm -v "$PWD:/repo" -w /repo \
+            rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 -color
+
+      # A tag is a moving pointer someone else controls. Every external action,
+      # in the workflows and in every composite action this repository ships,
+      # must be pinned to a full commit SHA with the version as a comment.
+      - name: Every action is pinned by SHA
+        run: |
+          unpinned="$(grep -rnE '^[[:space:]-]*uses:' --include='*.yml' --include='*.yaml' . \
+            | grep -vE 'uses:[[:space:]]*\./' \
+            | grep -vE '@[0-9a-f]{40} # v[0-9]' || true)"
+          if [ -n "$unpinned" ]; then
+            echo "::error::these actions are not pinned to a commit SHA with a # vX.Y.Z comment:"
+            echo "$unpinned"
+            exit 1
+          fi
+          echo "every action is pinned"
+
+      # Inputs pasted into a shell with ${{ inputs.x }} break on spaces and can
+      # run injected commands. They must reach scripts through env: instead.
+      - name: No inputs interpolated into run blocks
+        run: |
+          python3 - <<'EOF'
+          import pathlib, re, sys
+          bad = []
+          for p in list(pathlib.Path(".").rglob("action.yml")) + list(pathlib.Path(".github/workflows").glob("*.yml")):
+              in_run, indent = False, 0
+              for n, line in enumerate(p.read_text().splitlines(), 1):
+                  stripped = line.lstrip()
+                  cur = len(line) - len(stripped)
+                  if re.match(r"(- )?run: *[|>]", stripped):
+                      in_run, indent = True, cur
+                      continue
+                  if in_run and stripped and cur <= indent:
+                      in_run = False
+                  if in_run and re.search(r"\$\{\{\s*(inputs|github\.event)\.", line):
+                      bad.append(f"{p}:{n}: {stripped}")
+          if bad:
+              print("::error::pass these through env: instead of interpolating them into the script:")
+              print("\n".join(bad))
+              sys.exit(1)
+          print("no inputs interpolated into run blocks")
+          EOF
+
+  # A release pull request must carry its release notes. Checked here, on the
+  # pull request, because after the merge the only place left to find out is a
+  # failed tag run on master.
+  changelog:
+    name: Changelog
+    if: github.base_ref == 'master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: CHANGELOG.md describes VERSION
+        run: |
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          if ! grep -Eq "^## ${VERSION}( / [0-9]{4}-[0-9]{2}-[0-9]{2})?$" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '## ${VERSION}' section for VERSION ${VERSION}"
+            exit 1
+          fi
+          echo "CHANGELOG.md describes ${VERSION}"

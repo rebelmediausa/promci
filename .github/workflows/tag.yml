@@ -1,72 +1,101 @@
 ---
-name: Create Tags
+# Releases this action when develop is merged into master with a new VERSION.
+#
+#   1. On a feature branch: bump VERSION and add `## <VERSION>` to CHANGELOG.md.
+#   2. Merge to develop, then open develop -> master (the Changelog check runs).
+#   3. Merge. This workflow tags v<VERSION>, publishes a GitHub release with the
+#      CHANGELOG section as its notes, and moves the major tag (v1) to it.
+#
+# A merge that does not change VERSION (a Dependabot update, a README fix) is
+# not a release, and this workflow skips it instead of failing.
+#
+# The v* tag ruleset lets only GitHub Actions create or move release tags, so
+# nobody can repoint v1 by hand.
+name: Tag Release
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
 
 jobs:
-
-  Tag:
+  tag:
     name: Tag
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    outputs:
-      created: ${{ steps.check.outputs.created }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Set tag ENV
-        run: |
-          echo "VERSION=v$(cat VERSION)" >> "$GITHUB_ENV"
-
-      # A merge that does not bump VERSION (a Dependabot update, a README fix)
-      # is not a release. Skipping here, rather than letting createRef fail on
-      # the existing tag, keeps master green and leaves the major tag alone.
-      - name: Check whether the tag already exists
-        id: check
-        run: |
-          if git ls-remote --exit-code --tags origin "refs/tags/${VERSION}" >/dev/null; then
-            echo "created=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::${VERSION} already exists; nothing to release. Bump VERSION to release."
-          else
-            echo "created=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Create Tag
-        if: steps.check.outputs.created == 'true'
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        with:
-          script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/${{ env.VERSION }}',
-              sha: context.sha
-            })
-
-  MajorTag:
-    name: Update Major Version
-    runs-on: ubuntu-latest
-    needs: [Tag]
-    if: needs.Tag.outputs.created == 'true'
+    timeout-minutes: 10
     permissions:
       contents: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
-      - name: Set tag ENV
+      - name: Read VERSION
+        id: version
         run: |
-          echo "VERSION=v$(cat VERSION)" >> "$GITHUB_ENV"
-          echo "MAJOR_VERSION=v$(cut -d. -f1 VERSION)" >> "$GITHUB_ENV"
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          if ! printf '%s' "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::error::VERSION '$VERSION' is not semver (expected 1.2.3 or 1.2.3-rc.1)"
+            exit 1
+          fi
+          {
+            echo "version=$VERSION"
+            echo "tag=v$VERSION"
+            echo "major=v${VERSION%%.*}"
+          } >> "$GITHUB_OUTPUT"
 
-      - name: Update Major Version to ${{ github.ref_name }}
-        run: git tag -f "$MAJOR_VERSION" "$VERSION"
+      - name: Check whether the tag already exists
+        id: check
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::${TAG} already exists; nothing to release. Bump VERSION to release."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Push Major Version Tag
-        run: git push origin "$MAJOR_VERSION" --force
+      - name: Build the release notes from CHANGELOG.md
+        if: steps.check.outputs.exists == 'false'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          awk -v ver="$VERSION" '
+            /^## /{ current = ($2 == ver) ? 1 : 0; next }
+            current { print }
+          ' CHANGELOG.md | awk 'NF{p=1} p' > "$RUNNER_TEMP/notes.md"
+          if [ ! -s "$RUNNER_TEMP/notes.md" ]; then
+            echo "::error::CHANGELOG.md has no notes under '## ${VERSION}'"
+            exit 1
+          fi
+
+      - name: Tag, release, and move the major tag
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          MAJOR: ${{ steps.version.outputs.major }}
+        run: |
+          set -euo pipefail
+          git tag "$TAG" "$GITHUB_SHA"
+          git push origin "refs/tags/$TAG"
+
+          prerelease=""
+          case "$TAG" in *-*) prerelease="--prerelease" ;; esac
+          # shellcheck disable=SC2086
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag $prerelease \
+            --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md" --generate-notes
+
+          # Consumers pinned to the major tag (@v1) follow the newest release in
+          # that major; a pre-release never moves it.
+          if [ -z "$prerelease" ]; then
+            git tag -f "$MAJOR" "$GITHUB_SHA"
+            git push --force origin "refs/tags/$MAJOR"
+          fi

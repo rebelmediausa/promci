@@ -38,10 +38,15 @@ runs:
     - name: Compute image tags
       id: image_tags
       shell: bash
+      env:
+        REGISTRY: ${{ inputs.registry }}
+        ORGANIZATION: ${{ inputs.organization }}
+        IMAGE_NAME: ${{ inputs.container_image_name }}
+        IMAGE_TAG: ${{ inputs.container_image_tag }}
       run: |
         set -euo pipefail
-        image="${{ inputs.registry }}/${{ inputs.organization }}/${{ inputs.container_image_name }}"
-        tag="${{ inputs.container_image_tag }}"
+        image="${REGISTRY}/${ORGANIZATION}/${IMAGE_NAME}"
+        tag="${IMAGE_TAG}"
 
         tags=("${image}:${tag}")
         case "${tag}" in

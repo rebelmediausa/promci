@@ -4,13 +4,16 @@ updates:
   # GitHub Actions: minor/patch bumps are batched into one weekly PR; major
   # bumps still get their own PR so they can be reviewed individually.
   #
-  # Every composite action lives in its own directory, and Dependabot only reads
-  # the directories it is told about. Listing them all keeps every nested pin
-  # current, not just the repository's own workflows.
+  # Dependabot only reads the directories it is told about, so every directory
+  # holding an action.yml or a workflow is listed.
+  #
+  # Everything targets develop explicitly: master only ever receives merges
+  # from develop, and a dependency PR must never land on it directly.
   - package-ecosystem: "github-actions"
     directories:
       - "/"
       - "/actions/*"
+    target-branch: "develop"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -28,3 +31,5 @@ updates:
     # compromised releases have time to surface. Security updates are exempt.
     cooldown:
       default-days: 7
+    commit-message:
+      prefix: "ci"

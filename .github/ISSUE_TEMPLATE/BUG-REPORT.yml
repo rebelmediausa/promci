@@ -1,0 +1,40 @@
+---
+name: Bug Report
+description: Something in promci does not work as documented.
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If you have found a security vulnerability, do **not** file it here.
+        See [SECURITY.md](https://github.com/rebelmediausa/promci/blob/develop/SECURITY.md).
+  - type: input
+    id: ref
+    attributes:
+      label: Version or commit
+      description: The ref your workflow uses, e.g. `v1`, `v1.3.0`, or a commit SHA.
+    validations:
+      required: true
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Workflow
+      description: The workflow steps that use this action. Remove any secrets.
+      render: yaml
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: The failing step's log. Re-run with debug logging (`ACTIONS_STEP_DEBUG=true`) if you can.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expectation
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
