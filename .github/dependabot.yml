@@ -1,8 +1,13 @@
 version: 2
 
 updates:
+  # Every composite action lives in its own directory, and Dependabot only
+  # reads the directories it is told about. Listing them all keeps every
+  # nested pin current, not just the repository's own workflows.
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directories:
+      - "/"
+      - "/actions/*"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10

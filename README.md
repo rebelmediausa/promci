@@ -37,4 +37,4 @@ jobs:
 
 ## Image tagging behavior
 
-`./.github/promci/actions/publish_release_images` always pushes `:<container_image_tag>`. It also pushes `:latest` unless the tag contains `-alpha`, `-beta`, or `-rc`.
+`./.github/promci/actions/publish_release_images` always pushes `:<container_image_tag>`. It also pushes `:latest` unless the tag contains a hyphen, which is how semver marks a pre-release (`v1.2.0-rc.1`, `v1.2.0-beta`).
