@@ -1,0 +1,4 @@
+# The develop and master rulesets route every pull request through review by
+# the code owners. Repository-wide, because there is one maintainer.
+
+* @DylanUnderwood

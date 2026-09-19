@@ -35,11 +35,22 @@ runs:
 
     - name: Promu Build
       shell: bash
+      # Inputs reach the script through env and are quoted, never pasted in
+      # with ${{ }}, so a value can neither split into extra arguments nor run
+      # as a command.
+      # PROMU_OPTS may hold several options, so it is split into an array on
+      # whitespace; no word is ever evaluated.
       run: |
-        if [[ -f ${{ inputs.promu_config }} ]]; then
-          ~/go/bin/promu --config ${{ inputs.promu_config }} crossbuild -v --parallelism ${{ inputs.parallelism }} --parallelism-thread ${{ inputs.thread }} ${{ inputs.promu_opts }}
+        set -euo pipefail
+        if [[ -f "$PROMU_CONFIG" ]]; then
+          read -ra opts <<< "$PROMU_OPTS"
+          ~/go/bin/promu --config "$PROMU_CONFIG" crossbuild -v --parallelism "$PARALLELISM" --parallelism-thread "$THREAD" "${opts[@]}"
         fi
       env:
+        PROMU_CONFIG: ${{ inputs.promu_config }}
+        PROMU_OPTS: ${{ inputs.promu_opts }}
+        PARALLELISM: ${{ inputs.parallelism }}
+        THREAD: ${{ inputs.thread }}
         Version: ${{ env.VERSION }}
         Revision: ${{ env.REVISION }}
         Branch: ${{ env.BRANCH }}
@@ -49,10 +60,16 @@ runs:
     - name: Promu cgo Build
       shell: bash
       run: |
-        if [[ -f ${{ inputs.promu_cgo_config }} ]]; then
-          ~/go/bin/promu --config ${{ inputs.promu_cgo_config }} crossbuild -v --parallelism ${{ inputs.parallelism }} --parallelism-thread ${{ inputs.thread }} ${{ inputs.promu_opts }}
+        set -euo pipefail
+        if [[ -f "$PROMU_CGO_CONFIG" ]]; then
+          read -ra opts <<< "$PROMU_OPTS"
+          ~/go/bin/promu --config "$PROMU_CGO_CONFIG" crossbuild -v --parallelism "$PARALLELISM" --parallelism-thread "$THREAD" "${opts[@]}"
         fi
       env:
+        PROMU_CGO_CONFIG: ${{ inputs.promu_cgo_config }}
+        PROMU_OPTS: ${{ inputs.promu_opts }}
+        PARALLELISM: ${{ inputs.parallelism }}
+        THREAD: ${{ inputs.thread }}
         Version: ${{ env.VERSION }}
         Revision: ${{ env.REVISION }}
         Branch: ${{ env.BRANCH }}
@@ -61,13 +78,14 @@ runs:
     - name: Codesign
       shell: bash
       run: |
-        if [[ -d "$(pwd)/.build/darwin-arm64" ]]; then
-            ~/go/bin/promu codesign "$(pwd)/.build/darwin-arm64/${{ inputs.promu_codesign_binary }}"
-        fi
-
-        if [[ -d "$(pwd)/.build/darwin-amd64" ]]; then
-            ~/go/bin/promu codesign "$(pwd)/.build/darwin-amd64/${{ inputs.promu_codesign_binary }}"
-        fi
+        set -euo pipefail
+        for arch in darwin-arm64 darwin-amd64; do
+          if [[ -d "$PWD/.build/$arch" ]]; then
+            ~/go/bin/promu codesign "$PWD/.build/$arch/$CODESIGN_BINARY"
+          fi
+        done
+      env:
+        CODESIGN_BINARY: ${{ inputs.promu_codesign_binary }}
 
     - name: Save Artifacts
       uses: ./.github/promci/actions/save_artifacts
