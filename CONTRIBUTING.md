@@ -60,4 +60,5 @@ These are what the Lint check enforces, and why:
 2. Test from a real consumer workflow pinned to the develop commit SHA.
 3. Open a pull request from `develop` to `master` and merge it.
 4. CI tags `vx.y.z`, publishes the GitHub release and moves `v1`. Nobody tags
-   by hand; the tag ruleset only lets GitHub Actions create or move `v*` tags.
+   by hand: version tags are immutable once created, so a tag made by mistake
+   cannot be repointed.

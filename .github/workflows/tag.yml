@@ -9,8 +9,9 @@
 # A merge that does not change VERSION (a Dependabot update, a README fix) is
 # not a release, and this workflow skips it instead of failing.
 #
-# The v* tag ruleset lets only GitHub Actions create or move release tags, so
-# nobody can repoint v1 by hand.
+# Version tags (vX.Y.Z) are immutable under the repository's tag rulesets and
+# immutable releases, so this workflow is the only way a release comes to exist;
+# the major tag (v1) cannot be deleted, only moved here.
 name: Tag Release
 
 on:

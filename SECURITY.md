@@ -34,7 +34,9 @@ untrusted input reach a shell, a token, or a secret.
 - `develop` and `master` accept changes only through pull requests with passing
   checks and signed commits; force pushes and deletion are blocked, with no
   bypass for anyone.
-- Release tags (`v*`) can only be created or moved by GitHub Actions.
+- Version tags (`vX.Y.Z`) can never be moved or deleted, and releases are
+  immutable. The major tag (`v1`) cannot be deleted; the release workflow moves
+  it to each new release.
 - Every external action is pinned by commit SHA, enforced by CI and by the
   repository's Actions policy.
 - Secret scanning with push protection, Dependabot alerts and security updates,
